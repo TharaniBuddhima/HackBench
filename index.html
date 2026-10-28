@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HackBench – free security tools for learners</title>
+  <meta name="description"
+    content="Free browser-based security tools: password strength check, encoder/decoder, hash generator, JWT decoder and an OWASP Top 10 reference. Nothing leaves your device.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #E8EDF1;
+      --panel: #F7F9FA;
+      --ink: #16212B;
+      --muted: #50606E;
+      --line: #C5D0D9;
+      --accent: #2446E8;
+      --accent-ink: #fff;
+      --warn-bg: #FFF1CC;
+      --warn: #7A4E00;
+      --good: #17683A;
+      --bad: #A3262A;
+      color-scheme: light
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root {
+        --bg: #10171D;
+        --panel: #18222B;
+        --ink: #E6EDF2;
+        --muted: #93A3B1;
+        --line: #2B3A46;
+        --accent: #7C93FF;
+        --accent-ink: #0B1020;
+        --warn-bg: #3A2E0E;
+        --warn: #F2C766;
+        --good: #5FD08C;
+        --bad: #FF7B80;
+        color-scheme: dark
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.55 "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0)
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 28px 20px 48px
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      line-height: 1.05;
+      margin: 0 0 10px;
+      font-weight: 700;
+      letter-spacing: -.02em
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 0 0 4px
+    }
+
+    .lede {
+      max-width: 60ch;
+      color: var(--muted);
+      margin: 0 0 18px
+    }
+
+    .ethics {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-radius: 6px;
+      padding: 10px 14px;
+      max-width: 70ch;
+      margin: 0 0 28px;
+      font-size: .95rem
+    }
+
+    .bench {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+      align-items: start
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-left: 2px solid var(--line)
+    }
+
+    nav button {
+      all: unset;
+      cursor: pointer;
+      padding: 9px 14px;
+      margin-left: -2px;
+      border-left: 2px solid transparent;
+      color: var(--muted);
+      font-weight: 500
+    }
+
+    nav button:hover {
+      color: var(--ink)
+    }
+
+    nav button[aria-selected=true] {
+      color: var(--ink);
+      border-left-color: var(--accent);
+      font-weight: 700
+    }
+
+    nav button:focus-visible,
+    .btn:focus-visible,
+    summary:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+      min-width: 0
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 0 0 18px
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin: 14px 0 6px
+    }
+
+    textarea,
+    input[type=text],
+    input[type=password],
+    select {
+      width: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: 14px/1.5 "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    .btn {
+      background: var(--accent);
+      color: var(--accent-ink);
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 16px;
+      font: 500 .95rem "Bricolage Grotesque", sans-serif;
+      cursor: pointer
+    }
+
+    .btn.alt {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line)
+    }
+
+    .out {
+      font: 13px/1.5 "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 44px
+    }
+
+    .meter {
+      height: 8px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 14px 0 6px
+    }
+
+    .meter i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--bad);
+      transition: width .2s
+    }
+
+    .checks {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0
+    }
+
+    .checks li {
+      padding: 3px 0 3px 26px;
+      position: relative;
+      color: var(--muted)
+    }
+
+    .checks li::before {
+      content: "✗";
+      position: absolute;
+      left: 4px;
+      color: var(--bad)
+    }
+
+    .checks li.ok {
+      color: var(--ink)
+    }
+
+    .checks li.ok::before {
+      content: "✓";
+      color: var(--good)
+    }
+
+    .hashrow {
+      margin-top: 12px
+    }
+
+    .hashrow b {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: .9rem
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      padding: 10px 0
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    details p {
+      margin: 6px 0 0;
+      color: var(--muted)
+    }
+
+    .err {
+      color: var(--bad)
+    }
+
+    footer {
+      margin-top: 36px;
+      color: var(--muted);
+      font-size: .9rem;
+      max-width: 70ch
+    }
+
+    @media (max-width:720px) {
+      .bench {
+        grid-template-columns: 1fr
+      }
+
+      nav {
+        flex-direction: row;
+        overflow-x: auto;
+        border-left: 0;
+        border-bottom: 2px solid var(--line)
+      }
+
+      nav button {
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        margin: 0 0 -2px;
+        white-space: nowrap
+      }
+
+      nav button[aria-selected=true] {
+        border-bottom-color: var(--accent)
+      }
+
+      .panel {
+        padding: 18px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>HackBench</h1>
+      <p class="lede">Small security tools for people learning ethical hacking. Everything runs in your browser, so what
+        you type never leaves your device.</p>
+      <p class="ethics">Only test systems you own or have written permission to test. These tools inspect data you give
+        them. They never scan or contact other sites.</p>
+    </header>
+    <div class="bench">
+      <nav id="nav" role="tablist" aria-label="Tools"></nav>
+      <main class="panel" id="panel" role="tabpanel" tabindex="-1"></main>
+    </div>
+    <footer>Built as a learning project. Use it, break it, improve it.</footer>
+  </div>
+  <script>
+    "use strict";
+    const $ = (s, r = document) => r.querySelector(s);
+    const el = (tag, props = {}, ...kids) => { const { dataset, role, ...rest } = props; const e = Object.assign(document.createElement(tag), rest); if (dataset) Object.assign(e.dataset, dataset); if (role) e.setAttribute("role", role); kids.forEach(k => e.append(k)); return e; };
+    const enc = new TextEncoder(), dec = new TextDecoder();
+
+    /* ---------- helpers ---------- */
+    const toHex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+    const b64e = str => { let s = ""; enc.encode(str).forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+    const b64d = str => { const bin = atob(str.replace(/\s/g, "")); return dec.decode(Uint8Array.from(bin, c => c.charCodeAt(0))); };
+    const b64urlDecode = str => { str = str.replace(/-/g, "+").replace(/_/g, "/"); while (str.length % 4) str += "="; return b64d(str); };
+    function field(label, node) { const id = "f" + Math.random().toString(36).slice(2, 7); node.id = id; return [el("label", { htmlFor: id, textContent: label }), node]; }
+
+    /* ---------- tools ---------- */
+    const COMMON = ["password", "123456", "12345678", "qwerty", "letmein", "admin", "welcome", "iloveyou", "abc123", "password1", "111111", "dragon", "monkey", "football"];
+
+    function passwordTool(p) {
+      const input = el("input", { type: "password", autocomplete: "off", spellcheck: false });
+      const show = el("button", { className: "btn alt", textContent: "Show password", type: "button" });
+      const meter = el("div", { className: "meter" }, el("i"));
+      const verdict = el("div", { className: "out", textContent: "Type a password to test it." });
+      const list = el("ul", { className: "checks" });
+      show.onclick = () => { const t = input.type === "password"; input.type = t ? "text" : "password"; show.textContent = t ? "Hide password" : "Show password"; };
+      function human(sec) {
+        if (sec < 1) return "less than a second";
+        const u = [["years", 31557600], ["days", 86400], ["hours", 3600], ["minutes", 60], ["seconds", 1]];
+        if (sec > 31557600 * 1e9) return "longer than the age of the universe";
+        for (const [n, s] of u) if (sec >= s) return Math.round(sec / s).toLocaleString() + " " + n;
+      }
+      function run() {
+        const v = input.value;
+        const pool = (/[a-z]/.test(v) ? 26 : 0) + (/[A-Z]/.test(v) ? 26 : 0) + (/\d/.test(v) ? 10 : 0) + (/[^A-Za-z0-9]/.test(v) ? 33 : 0);
+        const common = COMMON.includes(v.toLowerCase());
+        let bits = v ? Math.log2(pool || 1) * v.length : 0;
+        if (common) bits = Math.min(bits, 10);
+        if (/(.)\1{2,}/.test(v)) bits *= 0.8;
+        const secs = Math.pow(2, bits) / 2 / 1e10;
+        const pct = Math.min(100, bits / 80 * 100);
+        meter.firstChild.style.width = pct + "%";
+        meter.firstChild.style.background = bits < 40 ? "var(--bad)" : bits < 60 ? "var(--warn)" : "var(--good)";
+        verdict.textContent = v ? `About ${Math.round(bits)} bits of entropy. An offline attacker making 10 billion guesses a second would need ${human(secs)} on average.` : "Type a password to test it.";
+        const checks = [["At least 12 characters", v.length >= 12], ["Upper and lower case letters", /[a-z]/.test(v) && /[A-Z]/.test(v)], ["Contains a number", /\d/.test(v)], ["Contains a symbol", /[^A-Za-z0-9]/.test(v)], ["Not a well-known password", v && !common], ["No character repeated 3+ times in a row", v && !/(.)\1{2,}/.test(v)]];
+        list.replaceChildren(...checks.map(([t, ok]) => el("li", { className: ok ? "ok" : "", textContent: t })));
+      }
+      input.oninput = run; run();
+      p.append(...field("Password to test", input), el("div", { className: "row" }, show), meter, verdict, list,
+        el("p", { className: "sub", style: "margin-top:16px", textContent: "Length beats complexity. A long passphrase of four or five random words is stronger and easier to remember than a short mix of symbols. This is an estimate, so use a password manager for real accounts." }));
+    }
+
+    function encodeTool(p) {
+      const mode = el("select", {}, ...["Base64", "URL", "Hex"].map(m => el("option", { textContent: m })));
+      const inp = el("textarea", { spellcheck: false });
+      const out = el("div", { className: "out" });
+      const go = dir => {
+        try {
+          const m = mode.value, v = inp.value; let r;
+          if (m === "Base64") r = dir ? b64e(v) : b64d(v);
+          else if (m === "URL") r = dir ? encodeURIComponent(v) : decodeURIComponent(v);
+          else r = dir ? toHex(enc.encode(v)) : dec.decode(Uint8Array.from(v.replace(/\s|0x/g, "").match(/.{1,2}/g) || [], h => { const n = parseInt(h, 16); if (isNaN(n)) throw new Error("Not valid hex"); return n; }));
+          out.className = "out"; out.textContent = r;
+        } catch (e) { out.className = "out err"; out.textContent = "Could not " + (dir ? "encode" : "decode") + " this input: " + e.message; }
+      };
+      p.append(...field("Format", mode), ...field("Input", inp),
+        el("div", { className: "row" }, el("button", { className: "btn", textContent: "Encode", onclick: () => go(true) }), el("button", { className: "btn alt", textContent: "Decode", onclick: () => go(false) })),
+        ...field("Result", out));
+      out.previousSibling.removeAttribute("for");
+    }
+
+    function hashTool(p) {
+      const inp = el("textarea", { spellcheck: false });
+      const algos = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
+      const outs = algos.map(a => [a, el("div", { className: "out" })]);
+      async function run() {
+        const data = enc.encode(inp.value);
+        for (const [a, node] of outs) node.textContent = toHex(await crypto.subtle.digest(a, data));
+      }
+      inp.oninput = run; run();
+      p.append(...field("Text to hash", inp));
+      outs.forEach(([a, n]) => p.append(el("div", { className: "hashrow" }, el("b", { textContent: a }), n)));
+      p.append(el("p", { className: "sub", style: "margin-top:16px", textContent: "Hashing is one-way, so a hash cannot be reversed, but weak passwords can be guessed. Never store passwords with plain SHA-256. Real systems use slow, salted functions like Argon2 or bcrypt. MD5 is left out because browsers do not support it and it is broken for security use." }));
+    }
+
+    function jwtTool(p) {
+      const inp = el("textarea", { spellcheck: false, placeholder: "eyJhbGciOi..." });
+      const out = el("div", { className: "out" });
+      function run() {
+        const t = inp.value.trim();
+        if (!t) { out.className = "out"; out.textContent = "Paste a JWT to decode it."; return; }
+        try {
+          const parts = t.split(".");
+          if (parts.length !== 3) throw new Error("A JWT has three parts separated by dots");
+          const h = JSON.parse(b64urlDecode(parts[0])), pl = JSON.parse(b64urlDecode(parts[1]));
+          let txt = "HEADER\n" + JSON.stringify(h, null, 2) + "\n\nPAYLOAD\n" + JSON.stringify(pl, null, 2);
+          if (typeof pl.exp === "number") txt += `\n\nExpires: ${new Date(pl.exp * 1000).toUTCString()} (${pl.exp * 1000 < Date.now() ? "expired" : "still valid"})`;
+          if (String(h.alg).toLowerCase() === "none") txt += "\n\nWarning: alg is \"none\", so the token is unsigned. Servers must reject this.";
+          out.className = "out"; out.textContent = txt;
+        } catch (e) { out.className = "out err"; out.textContent = "Not a valid JWT: " + e.message; }
+      }
+      inp.oninput = run; run();
+      p.append(...field("JWT", inp), ...field("Decoded", out), el("p", { className: "sub", style: "margin-top:16px", textContent: "Decoding is not verifying. Anyone can read a token’s contents, and only the signature check proves it is genuine. Do not paste live production tokens into any website." }));
+      out.previousSibling.removeAttribute("for");
+    }
+
+    const OWASP = [
+      ["A01 Broken Access Control", "Users can act outside the permissions they should have, such as viewing another person’s data by changing an ID in the URL.", "Deny by default and enforce permission checks on the server for every request."],
+      ["A02 Cryptographic Failures", "Sensitive data is exposed because encryption is missing, weak, or badly used.", "Use HTTPS everywhere, store passwords with Argon2 or bcrypt, and never invent your own crypto."],
+      ["A03 Injection", "Untrusted input is run as a command or query, as in SQL injection and cross-site scripting.", "Use parameterized queries and encode output for the context where it is shown."],
+      ["A04 Insecure Design", "The system lacks security thinking from the start, so no amount of patching fixes the flaw.", "Threat-model features early and write abuse cases alongside use cases."],
+      ["A05 Security Misconfiguration", "Default passwords, open admin panels, verbose error pages, or unneeded services left on.", "Use hardening baselines, remove defaults, and review configuration automatically."],
+      ["A06 Vulnerable and Outdated Components", "The app depends on libraries or software with known, public vulnerabilities.", "Keep an inventory of dependencies and scan and update them regularly."],
+      ["A07 Identification and Authentication Failures", "Weak login, session, or password-reset flows let attackers act as other users.", "Require multi-factor authentication, limit login attempts, and protect sessions."],
+      ["A08 Software and Data Integrity Failures", "Code or data is trusted without checking, such as unsigned updates or a compromised build pipeline.", "Verify signatures, pin dependencies, and lock down CI/CD access."],
+      ["A09 Security Logging and Monitoring Failures", "Attacks go unnoticed because events are not logged or nobody watches the logs.", "Log logins and failures centrally and set alerts on suspicious patterns."],
+      ["A10 Server-Side Request Forgery", "An attacker tricks the server into making requests to internal or unintended systems.", "Allow-list outbound destinations and block requests to internal addresses."]
+    ];
+    function owaspTool(p) {
+      p.append(el("p", { className: "sub", textContent: "The ten web application risks from the OWASP Top 10 (2021 edition), each with the standard defence. Check owasp.org for the latest edition." }));
+      OWASP.forEach(([t, what, fix]) => p.append(el("details", {}, el("summary", { textContent: t }), el("p", { textContent: what }), el("p", { textContent: "Defence: " + fix }))));
+    }
+
+    const TOOLS = [
+      ["password", "Password strength", "Password strength checker", "Test how long a password would survive an offline attack.", passwordTool],
+      ["encode", "Encoder / decoder", "Encoder and decoder", "Convert text to and from Base64, URL encoding and hex.", encodeTool],
+      ["hash", "Hash generator", "Hash generator", "See SHA hashes of any text as you type.", hashTool],
+      ["jwt", "JWT decoder", "JWT decoder", "Read the header and claims inside a JSON Web Token.", jwtTool],
+      ["owasp", "OWASP Top 10", "OWASP Top 10 reference", "The most common web risks and how to defend against them.", owaspTool]
+    ];
+
+    /* ---------- shell ---------- */
+    const nav = $("#nav"), panel = $("#panel");
+    function show(id, focus) {
+      const t = TOOLS.find(x => x[0] === id) || TOOLS[0];
+      [...nav.children].forEach(b => b.setAttribute("aria-selected", b.dataset.id === t[0]));
+      panel.replaceChildren(el("h2", { textContent: t[2] }), el("p", { className: "sub", textContent: t[3] }));
+      t[4](panel);
+      document.title = t[2] + " – HackBench";
+      if (focus) panel.focus({ preventScroll: false });
+    }
+    TOOLS.forEach(t => nav.append(el("button", { textContent: t[1], role: "tab", dataset: { id: t[0] }, onclick: () => { history.replaceState(null, "", "#" + t[0]); show(t[0], true); } })));
+    show(location.hash.slice(1));
+  </script>
+</body>
+
+</html>
